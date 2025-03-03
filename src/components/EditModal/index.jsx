@@ -3,26 +3,20 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import { editPost } from "../../services/api";
+import useForm from "../Hooks/useForm";
 function EditModal({ editItem, editShow, editClose, setEditShow, fetchPosts }) {
-  const [editedUser, setEditedUser] = useState(editItem);
-
-  console.log(editItem);
-  console.log(editedUser);
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-
-    setEditedUser({
-      ...editedUser,
-      [name]: value,
-    });
-  };
+  const {
+    handleInputChange,
+    resetForm,
+    form: editedUser,
+  } = useForm(editItem);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await editPost(editedUser.id, editedUser);
-    setEditShow(false);
+    setEditShow();
     fetchPosts();
+    resetForm();
   };
   return (
     <div

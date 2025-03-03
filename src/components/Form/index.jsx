@@ -1,56 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Title from "../Title";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { createPosts } from "../../services/api";
-import { isValidEmail } from "../Helpers/regex";
+// import { isValidEmail } from "../Helpers/regex";
+import { toast } from "react-toastify";
+import useForm from "../Hooks/useForm";
+
 
 function MainForm({ refreshData }) {
   const values = { firstName: "", email: "", position: "", age: "" };
 
-  const [form, setForm] = useState(values);
-  const [errors, setErrors] = useState({ email: "", age: "", form: "" });
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+  // const [form, setForm] = useState(values);
+  // const [errors, setErrors] = useState({ email: "", age: "", form: "" });
 
-    setForm({
-      ...form,
-      [name]: value,
-    });
+  const { handleInputChange, form, resetForm } = useForm(values);
 
-    let newErrors = { ...errors };
-
-    if (name === "email") {
-      newErrors.email = !isValidEmail(value)
-        ? "Please enter a valid email"
-        : "";
-    }
-
-    if (name === "age") {
-      newErrors.age = value < 0 ? "Age cannot be negative" : "";
-    }
-
-    setErrors(newErrors);
-  };
-  async function handleSubmit() {
-    const newErrors = { ...errors };
-
-    if (Object.values(form).some((value) => value === "")) {
-      newErrors.form = "All fields must be filled";
-    } else {
-      newErrors.form = "";
-    }
-
-    setErrors(newErrors);
-
-    if (newErrors.email || newErrors.age || newErrors.form) return;
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    console.log(form);
 
     await createPosts(form);
-    setForm(values);
+    // setForm(values);
     refreshData();
-  }
-
+    toast.success(" added successfully!", {
+      position: "top-right",
+      autoClose: 1000,
+    });
+    resetForm();
+  }, [form]);
   return (
     <>
       <Title title="Add User" />
@@ -61,7 +40,7 @@ function MainForm({ refreshData }) {
             type="text"
             placeholder="Enter name"
             onChange={handleInputChange}
-            value={form.firstName}
+            value={form?.firstName}
             name="firstName"
           />
         </Form.Group>
@@ -71,14 +50,9 @@ function MainForm({ refreshData }) {
             type="email"
             placeholder="enter email"
             onChange={handleInputChange}
-            value={form.email}
+            value={form?.email}
             name="email"
           />
-          {errors.email && (
-            <div style={{ color: "red", textAlign: "left" }}>
-              {errors.email}
-            </div>
-          )}
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formBasicPosition">
@@ -86,7 +60,7 @@ function MainForm({ refreshData }) {
             type="text"
             placeholder="enter position"
             onChange={handleInputChange}
-            value={form.position}
+            value={form?.position}
             name="position"
           />
         </Form.Group>
@@ -96,18 +70,11 @@ function MainForm({ refreshData }) {
             type="number"
             placeholder="enter age"
             onChange={handleInputChange}
-            value={form.age}
+            value={form?.age}
             name="age"
           />
-          {errors.age && (
-            <div style={{ color: "red", textAlign: "left" }}>{errors.age}</div>
-          )}
-           {errors.form && (
-          <div style={{ color: "red", textAlign: "left" }}>{errors.form}</div>
-        )}
         </Form.Group>
-       
-        
+
         <Button
           variant="primary"
           style={{ width: "100%" }}
